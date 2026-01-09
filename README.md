@@ -4,7 +4,7 @@
 
 ## 🚀 在线演示
 **[点击这里访问我的导航站](https://spongegg.github.io/-/)**
-*(请将上方链接修改为你自己的 GitHub Pages 实际地址)*
+*(请确保上方链接是你正确的 GitHub Pages 地址)*
 
 ## ✨ 功能特点
 - **单文件架构**：所有代码都在 `index.html` 中，方便迁移和备份。
@@ -30,3 +30,26 @@
         <span class="card-desc">这里是一句简短的描述</span>
     </div>
 </a>
+```
+
+### 2. 添加一个新的【分类】
+
+```html
+<div class="category">
+    <!-- 修改下面的 fa-folder 为你喜欢的图标，修改文字为你的分类名 -->
+    <h2 class="category-title"><i class="fas fa-folder"></i> 新分类名称</h2>
+    <div class="grid">
+        <!-- 在这里放入上面的书签代码 -->
+    </div>
+</a>
+```
+
+### 3. 修改图标
+本项目使用 FontAwesome 6 图标库。
+访问 FontAwesome 图标搜索。
+搜索关键词（如 github, video, tool）。
+复制图标代码，例如 fa-solid fa-house。
+将代码填入 <i class="..."></i> 的 class 属性中
+
+
+
