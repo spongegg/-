@@ -13,3 +13,4 @@ template = """
 
 for url, icon, title, desc in bookmarks:
     print(template.format(url=url, icon=icon, title=title, desc=desc))
+
