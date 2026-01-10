@@ -3,119 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>书签代码生成器</title>
-    <!-- 引入 FontAwesome 图标库用于预览 -->
+    <title>书签生成器 (无弹窗版)</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; padding: 40px; background: #f4f6f8; max-width: 800px; margin: 0 auto; }
-        h1 { text-align: center; color: #333; }
+        :root {
+            --bg: #111827; --card: #1f2937; --text: #f3f4f6; --sub: #9ca3af;
+            --primary: #3b82f6; --border: #374151;
+        }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; display: flex; justify-content: center; padding: 40px; }
+        .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; }
         
-        .input-group { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .form-row { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
-        input { width: 100%; padding: 10px; border: 2px solid #eee; border-radius: 5px; font-size: 16px; box-sizing: border-box; }
-        input:focus { border-color: #3b82f6; outline: none; }
-        
+        input, textarea {
+            background: var(--card); border: 1px solid var(--border); color: var(--text);
+            padding: 12px; border-radius: 8px; width: 100%; box-sizing: border-box; outline: none;
+        }
+        input:focus, textarea:focus { border-color: var(--primary); }
+        textarea { height: 100px; font-family: monospace; font-size: 13px; resize: none; }
+
         button {
-            background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 5px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.2s;
+            background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s;
         }
-        button:hover { background: #2563eb; }
+        button:hover { opacity: 0.9; }
 
-        .output-area { margin-top: 20px; }
-        textarea { width: 100%; height: 120px; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-family: monospace; font-size: 14px; box-sizing: border-box; }
-
-        /* 预览样式 (保持和你主页一致) */
-        .preview-box { margin-top: 30px; border-top: 2px dashed #ddd; padding-top: 20px; }
-        .preview-title { font-size: 14px; color: #888; margin-bottom: 10px; }
-        
-        .card {
-            background: #ffffff; border-radius: 10px; padding: 12px 15px; text-decoration: none;
-            display: inline-flex; align-items: center; transition: transform 0.2s, box-shadow 0.2s; 
-            border: 1px solid transparent; width: 220px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        .preview-area { padding: 20px; border: 1px dashed var(--border); border-radius: 10px; display: flex; justify-content: center; }
+        .card { 
+            background: var(--card); border: 1px solid var(--border); border-radius: 12px; 
+            padding: 14px 16px; text-decoration: none; display: flex; align-items: center; 
+            width: 240px; transition: 0.2s;
         }
-        .card-icon {
-            width: 36px; height: 36px; border-radius: 8px; background: #eff6ff; color: #3b82f6;
-            display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0; font-size: 18px;
+        .card:hover { transform: translateY(-4px); border-color: var(--primary); }
+        .card-icon { 
+            width: 42px; height: 42px; border-radius: 10px; background: rgba(59, 130, 246, 0.1); 
+            color: var(--primary); display: flex; align-items: center; justify-content: center; 
+            margin-right: 14px; flex-shrink: 0; font-size: 20px; 
         }
-        .card-info { flex: 1; overflow: hidden; font-family: sans-serif; line-height: 1.4; text-align: left; }
-        .card-title { font-weight: 600; font-size: 0.9rem; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
-        .card-desc { font-size: 0.75rem; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; display: block; }
-
-        .copy-btn { margin-top: 10px; background: #10b981; }
-        .copy-btn:hover { background: #059669; }
+        .card-name { font-weight: 600; font-size: 0.95rem; color: var(--text); display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .card-desc { font-size: 0.75rem; color: var(--sub); margin-top: 3px; display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
     </style>
 </head>
 <body>
 
-    <h1>🚀 书签代码生成器</h1>
-
-    <div class="input-group">
-        <div class="form-row">
-            <label>网站名称</label>
-            <input type="text" id="w_title" placeholder="例如：Wallhaven">
-        </div>
-        <div class="form-row">
-            <label>网站地址 (URL)</label>
-            <input type="text" id="w_url" placeholder="例如：https://wallhaven.cc/">
-        </div>
-        <div class="form-row">
-            <label>网站描述</label>
-            <input type="text" id="w_desc" placeholder="例如：高清壁纸网站">
-        </div>
-        <div class="form-row">
-            <label>图标代码 (FontAwesome)</label>
-            <input type="text" id="w_icon" placeholder="例如：fas fa-camera-retro">
-            <small style="color:#888">去 <a href="https://fontawesome.com/search?m=free" target="_blank">FontAwesome</a> 找图标</small>
-        </div>
+    <div class="container">
+        <h2 style="text-align:center; margin-bottom:10px;">书签生成器</h2>
         
-        <button onclick="generateCode()">生成代码</button>
-    </div>
+        <input type="text" id="title" placeholder="网站名称" oninput="gen()">
+        <input type="text" id="url" placeholder="网址" oninput="gen()">
+        <input type="text" id="desc" placeholder="描述" oninput="gen()">
+        <input type="text" id="icon" placeholder="图标代码 (如: fas fa-link)" oninput="gen()">
+        
+        <div class="preview-area">
+            <div id="preview"></div>
+        </div>
 
-    <div class="preview-box">
-        <div class="preview-title">效果预览：</div>
-        <div id="preview"></div>
-    </div>
-
-    <div class="output-area">
-        <label>生成的 HTML 代码：</label>
-        <textarea id="result"></textarea>
-        <button class="copy-btn" onclick="copyCode()">复制到剪贴板</button>
+        <textarea id="output" readonly></textarea>
+        <button id="btn" onclick="copy()">复制 HTML 代码</button>
     </div>
 
     <script>
-        function generateCode() {
-            // 获取输入值
-            const title = document.getElementById('w_title').value || '未命名';
-            const url = document.getElementById('w_url').value || '#';
-            const desc = document.getElementById('w_desc').value || '暂无描述';
-            const icon = document.getElementById('w_icon').value || 'fas fa-link';
+        function gen() {
+            const v = (id) => document.getElementById(id).value;
+            const t = v('title') || '标题';
+            const u = v('url') || '#';
+            const d = v('desc') || '描述';
+            const i = v('icon') || 'fas fa-link';
 
-            // 模板
             const html = `
-                <a href="${url}" target="_blank" class="card">
-                    <div class="card-icon"><i class="${icon}"></i></div>
-                    <div class="card-info"><span class="card-title">${title}</span><span class="card-desc">${desc}</span></div>
-                </a>`;
+                <a href="${u}" target="_blank" class="card">
+                    <div class="card-icon"><i class="${i}"></i></div>
+                    <div class="card-info"><span class="card-name">${t}</span><span class="card-desc">${d}</span></div>
+                </a>`.trim();
 
-            // 去掉首尾多余空格
-            const cleanHtml = html.replace(/^\s+/gm, ''); 
-
-            // 显示结果
-            document.getElementById('result').value = html;
-            
-            // 显示预览
+            document.getElementById('output').value = html;
             document.getElementById('preview').innerHTML = html;
         }
 
-        function copyCode() {
-            const copyText = document.getElementById("result");
-            copyText.select();
-            copyText.setSelectionRange(0, 99999); // 适配手机
-            navigator.clipboard.writeText(copyText.value).then(() => {
-                alert("已复制！快去 index.html 里粘贴吧。");
-            });
+        function copy() {
+            navigator.clipboard.writeText(document.getElementById('output').value);
+            const btn = document.getElementById('btn');
+            const original = btn.innerText;
+            btn.innerText = '✅ 已复制';
+            btn.style.background = '#059669'; // 变绿提示
+            setTimeout(() => {
+                btn.innerText = original;
+                btn.style.background = ''; // 恢复原色
+            }, 1000);
         }
+        
+        window.onload = gen;
     </script>
-
 </body>
 </html>
