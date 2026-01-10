@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>书签转导航站代码工具</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #111827; --card: #1f2937; --text: #f3f4f6; --sub: #9ca3af;
+            --primary: #3b82f6; --border: #374151; --success: #059669;
+        }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; padding: 40px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 20px; }
+        
+        h1 { text-align: center; margin-bottom: 10px; }
+        
+        /* 上传区域 */
+        .upload-box {
+            border: 2px dashed var(--border); border-radius: 12px; padding: 40px;
+            text-align: center; background: var(--card); cursor: pointer; transition: 0.3s;
+        }
+        .upload-box:hover { border-color: var(--primary); background: #2d3748; }
+        .upload-box i { font-size: 40px; color: var(--sub); margin-bottom: 10px; }
+        
+        /* 按钮 */
+        button {
+            background: var(--primary); color: white; border: none; padding: 12px 24px; 
+            border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px;
+        }
+        button:hover { opacity: 0.9; }
+        .btn-copy { background: var(--success); width: 100%; }
+
+        /* 结果区域 */
+        textarea {
+            width: 100%; height: 300px; background: #0f131a; border: 1px solid var(--border);
+            color: #a5b4fc; padding: 15px; border-radius: 8px; font-family: monospace;
+            resize: vertical; white-space: pre;
+        }
+
+        /* 预览区域 (简化版，仅展示结构) */
+        .preview-title { margin-top: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        #preview { 
+            background: var(--bg); padding: 20px; border: 1px solid var(--border); border-radius: 8px;
+            max-height: 400px; overflow-y: auto;
+        }
+
+        /* 注入的样式，保证预览看起来像你的网站 */
+        .category { margin-bottom: 30px; }
+        .cat-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; color: white; }
+        .cat-title i { margin-right: 10px; color: var(--primary); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
+        .card { 
+            background: var(--card); border: 1px solid var(--border); border-radius: 10px; 
+            padding: 12px; text-decoration: none; display: flex; align-items: center; transition: 0.2s;
+        }
+        .card:hover { border-color: var(--primary); transform: translateY(-2px); }
+        .card-icon { width: 32px; height: 32px; margin-right: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+        .card-icon img { width: 100%; height: 100%; border-radius: 4px; object-fit: contain; }
+        .card-icon i { font-size: 18px; color: var(--sub); }
+        .card-info { overflow: hidden; }
+        .card-name { display: block; font-size: 14px; font-weight: bold; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-desc { display: block; font-size: 12px; color: var(--sub); margin-top: 2px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>📑 书签 HTML 转换器</h1>
+        <p style="text-align:center; color:var(--sub);">请上传从 Chrome / Edge / Firefox 导出的 HTML 书签文件</p>
+
+        <input type="file" id="fileInput" accept=".html" style="display: none;" onchange="processFile()">
+        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>点击上传 bookmarks.html 文件</p>
+        </div>
+
+        <div id="resultArea" style="display: none;">
+            <h3>生成代码：</h3>
+            <textarea id="output" readonly></textarea>
+            <button class="btn-copy" id="copyBtn" onclick="copyCode()">复制全部代码</button>
+
+            <h3 class="preview-title">效果预览：</h3>
+            <div id="preview"></div>
+        </div>
+    </div>
+
+    <script>
+        function processFile() {
+            const file = document.getElementById('fileInput').files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                parseBookmarks(content);
+            };
+            reader.readAsText(file);
+        }
+
+        function parseBookmarks(htmlContent) {
+            // 创建一个虚拟 DOM 来解析 HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlContent, "text/html");
+            
+            let finalHtml = "";
+            let previewHtml = "";
+
+            // 查找所有的 DT 标签（通常包含 H3 和 DL）
+            // 逻辑：找到 H3 (文件夹名)，然后找它紧接着的 DL (链接列表)
+            const dts = doc.querySelectorAll('dt');
+
+            dts.forEach(dt => {
+                const h3 = dt.querySelector('h3');
+                const dl = dt.querySelector('dl');
+
+                // 只有当这是一个文件夹，并且里面有链接时才处理
+                if (h3 && dl) {
+                    const categoryName = h3.textContent;
+                    const links = dl.querySelectorAll('a');
+
+                    if (links.length > 0) {
+                        // 开始构建 Category
+                        let catSection = `
+        <!-- 分类: ${categoryName} -->
+        <div class="category">
+            <div class="cat-title"><i class="fas fa-folder-open"></i>&nbsp; ${categoryName}</div>
+            <div class="grid">`;
+
+                        links.forEach(link => {
+                            const title = link.textContent;
+                            const url = link.href;
+                            const iconData = link.getAttribute('icon'); // 获取 Base64 图标
+                            
+                            // 图标处理：如果有 Base64 则用 img，否则用默认图标
+                            let iconHtml = '<i class="fas fa-link"></i>';
+                            if (iconData) {
+                                iconHtml = `<img src="${iconData}" alt="icon">`;
+                            }
+
+                            catSection += `
+                <a href="${url}" target="_blank" class="card">
+                    <div class="card-icon">${iconHtml}</div>
+                    <div class="card-info"><span class="card-name">${title}</span><span class="card-desc">${url.replace(/https?:\/\//, '').split('/')[0]}</span></div>
+                </a>`;
+                        });
+
+                        catSection += `
+            </div>
+        </div>`;
+                        
+                        finalHtml += catSection;
+                    }
+                }
+            });
+
+            // 如果没有检测到文件夹结构（有些导出直接是扁平的链接）
+            if (finalHtml === "") {
+                alert("未检测到标准的文件夹结构，将尝试直接提取所有链接。");
+                // 备用逻辑：提取所有链接到一个默认分类
+                const links = doc.querySelectorAll('a');
+                if(links.length > 0) {
+                     finalHtml = `
+        <div class="category">
+            <div class="cat-title"><i class="fas fa-star"></i>&nbsp; 导入的书签</div>
+            <div class="grid">`;
+                    links.forEach(link => {
+                        finalHtml += `
+                <a href="${link.href}" target="_blank" class="card">
+                    <div class="card-icon"><i class="fas fa-link"></i></div>
+                    <div class="card-info"><span class="card-name">${link.textContent}</span></div>
+                </a>`;
+                    });
+                    finalHtml += `
+            </div>
+        </div>`;
+                }
+            }
+
+            // 输出结果
+            document.getElementById('output').value = finalHtml;
+            document.getElementById('preview').innerHTML = finalHtml;
+            document.getElementById('resultArea').style.display = 'block';
+            document.querySelector('.upload-box').style.display = 'none'; // 隐藏上传框
+        }
+
+        function copyCode() {
+            const output = document.getElementById('output');
+            output.select();
+            document.execCommand('copy');
+            
+            const btn = document.getElementById('copyBtn');
+            const originalText = btn.innerText;
+            btn.innerText = '✅ 复制成功';
+            setTimeout(() => { btn.innerText = originalText; }, 2000);
+        }
+    </script>
+</body>
+</html>
