@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN" data-theme="dark">
 <head>
@@ -7,168 +6,169 @@
     <title>极简导航</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* ============================ */
-        /*      1. CSS 变量定义         */
-        /* ============================ */
+        /* ================= 1. 配置区域 ================= */
         :root {
-            /* 默认夜间模式变量 */
-            --bg-color: #111827;
-            --card-bg: #1f2937;
-            --text-main: #f3f4f6;
-            --text-sub: #9ca3af;
-            --primary: #3b82f6;
-            --google: #EA4335;
-            --bing: #00809d;
-            --border: #374151;
-            --shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.5);
-            --anim: 0.3s ease;
+            /* 界面配色 */
+            --bg: #111827;       /* 背景色 */
+            --card: #1f2937;     /* 卡片/按钮背景 */
+            --text: #f3f4f6;     /* 主文字 */
+            --sub: #9ca3af;      /* 副文字 */
+            --border: #374151;   /* 边框 */
+            --accent: #3b82f6;   /* 强调色(蓝色) - 用于搜索按钮和高亮 */
+            
+            /* 搜索引擎主题色 */
+            --c-google: #EA4335;
+            --c-bing:   #00809d;
+            --c-yandex: #fcb900;
         }
 
+        /* 日间模式变量覆盖 */
         [data-theme="light"] {
-            /* 日间模式变量 */
-            --bg-color: #f4f6f8;
-            --card-bg: #ffffff;
-            --text-main: #333333;
-            --text-sub: #666666;
+            --bg: #f4f6f8; --card: #ffffff; --text: #333; --sub: #666;
             --border: #e5e7eb;
-            --shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.15);
         }
 
-        /* ============================ */
-        /*      2. 全局基础样式         */
-        /* ============================ */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        /* ================= 2. 基础布局 ================= */
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; margin: 0; display: flex; flex-direction: column; transition: 0.3s; }
+        a { text-decoration: none; color: inherit; }
+        button { cursor: pointer; border: none; background: transparent; color: inherit; }
         
-        body { 
-            font-family: 'Segoe UI', Tahoma, sans-serif; 
-            background-color: var(--bg-color); 
-            color: var(--text-main); 
-            min-height: 100vh;
-            display: flex; flex-direction: column;
-            overflow-x: hidden;
-            transition: background-color var(--anim), color var(--anim);
-        }
+        /* 顶部主题按钮 */
+        .top-bar { position: absolute; top: 20px; right: 20px; }
+        .theme-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--card); border: 1px solid var(--border); transition: 0.3s; display: flex; align-items: center; justify-content: center;}
+        .theme-btn:hover { border-color: var(--accent); color: var(--accent); transform: rotate(15deg); }
 
-        /* 右上角主题开关 */
-        .top-bar { position: absolute; top: 20px; right: 20px; z-index: 100; }
-        .theme-btn {
-            width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
-            background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main);
-            display: flex; align-items: center; justify-content: center;
-            transition: all var(--anim);
-        }
-        .theme-btn:hover { border-color: var(--primary); transform: rotate(15deg); }
-
-        /* ============================ */
-        /*      3. 头部 & 搜索区        */
-        /* ============================ */
-        header { padding: 80px 20px 30px; text-align: center; }
-
-        /* 时钟组件 */
-        .clock { margin-bottom: 30px; user-select: none; }
-        .clock-time { font-size: 3.5rem; font-weight: 700; letter-spacing: 2px; }
-        .clock-date { font-size: 1rem; color: var(--text-sub); margin-top: 5px; opacity: 0.8; }
-
-        /* 搜索容器 */
-        .search-box { max-width: 640px; margin: 0 auto; position: relative; }
+        /* ================= 3. 头部与搜索 ================= */
+        header { padding: 10vh 20px 40px; text-align: center; max-width: 700px; margin: 0 auto; }
         
-        /* 引擎切换按钮 */
-        .engine-switch { display: flex; justify-content: center; gap: 12px; margin-bottom: 25px; }
+        /* 时钟 */
+        .time { font-size: 3.5rem; font-weight: 700; letter-spacing: 1px; }
+        .date { color: var(--sub); margin-bottom: 30px; }
+
+        /* 引擎切换器 */
+        .eng-switch { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
         .eng-btn {
-            cursor: pointer; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;
-            color: var(--text-sub); background: var(--card-bg); border: 1px solid var(--border);
-            transition: var(--anim); display: flex; align-items: center; gap: 6px;
+            padding: 8px 18px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;
+            background: var(--card); border: 1px solid var(--border); color: var(--sub);
+            display: flex; align-items: center; gap: 8px; transition: 0.2s;
         }
-        .eng-btn.active[data-id="google"] { background: var(--google); color: #fff; border-color: var(--google); }
-        .eng-btn.active[data-id="bing"] { background: var(--bing); color: #fff; border-color: var(--bing); }
-
-        /* 输入框区域 */
-        .input-wrapper { position: relative; width: 100%; }
-        .input-wrapper input {
-            width: 100%; padding: 18px 60px 18px 25px; 
-            background: var(--card-bg); color: var(--text-main);
-            border: 2px solid var(--border); border-radius: 50px; 
-            font-size: 18px; outline: none; transition: var(--anim);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        .input-wrapper input:focus { border-color: var(--primary); box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.2); }
+        .eng-btn:hover { transform: translateY(-2px); }
         
-        /* 搜索图标 (绝对定位) */
-        .search-icon {
-            position: absolute; right: 10px; top: 50%; transform: translateY(-50%); 
-            width: 45px; height: 45px; border-radius: 50%; border: none; background: transparent;
-            font-size: 20px; color: var(--text-sub); cursor: pointer; transition: var(--anim);
-            display: flex; align-items: center; justify-content: center;
-        }
-        .search-icon:hover { color: var(--primary); background: rgba(59, 130, 246, 0.1); }
+        /* 引擎选中状态 */
+        .eng-btn.active { color: #fff; border-color: transparent; transform: scale(1.05); }
+        .eng-btn[data-id="google"].active { background: var(--c-google); }
+        .eng-btn[data-id="bing"].active   { background: var(--c-bing); }
+        .eng-btn[data-id="yandex"].active { background: var(--c-yandex); color: #000; }
 
-        /* 书签总开关 */
-        .toggle-area { margin-top: 40px; text-align: center; }
-        .main-toggle {
-            background: transparent; color: var(--text-sub); border: 1px solid var(--border);
-            padding: 8px 25px; border-radius: 30px; cursor: pointer; font-size: 0.95rem;
-            transition: var(--anim); display: inline-flex; align-items: center; gap: 8px;
+        /* --- 搜索框区域 (优化版) --- */
+        .input-group { 
+            position: relative; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            display: flex; /* 使用 Flex 布局 */
+            align-items: center;
         }
-        .main-toggle:hover { color: var(--text-main); border-color: var(--primary); background: var(--card-bg); }
-
-        /* ============================ */
-        /*      4. 书签主体区域         */
-        /* ============================ */
-        .container { 
-            width: 96%; max-width: 1800px; margin: 0 auto; padding: 20px 0;
-            flex: 1; display: none; /* 默认隐藏 */
-            animation: slideUp 0.4s ease-out;
+        
+        input {
+            width: 100%; 
+            height: 52px; 
+            padding: 0 60px 0 25px; /* 右侧留空给图标 */
+            border-radius: 50px;
+            /* 背景稍微深一点，增加层次感 */
+            background: rgba(31, 41, 55, 0.8); 
+            border: 2px solid var(--border); 
+            color: var(--text);
+            font-size: 1.1rem; 
+            outline: none; 
+            transition: all 0.3s ease;
         }
-        .container.show { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* 分类标题 */
-        .category { margin-bottom: 35px; }
-        .cat-title { 
-            font-size: 1.1rem; padding: 0 10px 15px; font-weight: 700; color: var(--text-main);
-            display: flex; align-items: center; gap: 10px; border-bottom: 1px solid transparent;
-        }
-        .cat-bar { width: 4px; height: 18px; background: var(--primary); border-radius: 2px; }
-
-        /* 网格布局 */
-        .grid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; 
+        
+        /* 输入框聚焦时：边框变亮，阴影增强 */
+        input:focus { 
+            border-color: var(--accent); 
+            background: var(--card);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); 
         }
 
-        /* 卡片样式 */
-        .card { 
-            background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; 
-            padding: 14px 16px; text-decoration: none; display: flex; align-items: center; 
-            transition: all 0.2s; 
+        /* 搜索按钮 - 极简透明风格 */
+        .search-btn { 
+            position: absolute; 
+            right: 6px; 
+            top: 50%;
+            transform: translateY(-50%); /* 垂直居中 */
+            
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%;
+            
+            /* 默认透明背景，只显示图标颜色 */
+            background: transparent; 
+            color: var(--sub); /* 默认灰色，不抢眼 */
+            
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-size: 1.2rem; 
+            transition: all 0.2s ease;
         }
-        .card:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: var(--primary); }
+
+        /* 鼠标悬停时：显示背景色和主题色 */
+        .search-btn:hover { 
+            background: rgba(59, 130, 246, 0.1); /* 淡淡的蓝色背景 */
+            color: var(--accent); /* 图标变蓝 */
+            transform: translateY(-50%) scale(1.1);
+        }
+        /* --------------------------- */
+
+        /* 书签开关 */
+        .toggle-bm { margin-top: 30px; padding: 8px 25px; border: 1px solid var(--border); border-radius: 30px; color: var(--sub); transition: 0.3s; }
+        .toggle-bm:hover { border-color: var(--accent); color: var(--text); background: var(--card); }
+
+        /* ================= 4. 书签区域 ================= */
+        #bookmarks { 
+            display: none; width: 95%; max-width: 1600px; margin: 0 auto; padding-bottom: 40px; 
+            animation: slideUp 0.4s ease-out; 
+        }
+        #bookmarks.show { display: block; }
+        
+        .cat-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .cat-bar { width: 4px; height: 18px; background: var(--accent); border-radius: 2px; }
+        .category { margin-bottom: 30px; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        
+        .card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+            padding: 14px; display: flex; align-items: center; transition: 0.2s;
+        }
+        .card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.3); }
         
         .card-icon { 
-            width: 42px; height: 42px; border-radius: 10px; background: rgba(59, 130, 246, 0.1); 
-            color: var(--primary); display: flex; align-items: center; justify-content: center; 
-            margin-right: 14px; flex-shrink: 0; font-size: 20px; transition: var(--anim); 
+            width: 40px; height: 40px; border-radius: 8px; background: rgba(59, 130, 246, 0.1); 
+            color: var(--accent); display: flex; align-items: center; justify-content: center; 
+            margin-right: 12px; font-size: 1.2rem; flex-shrink: 0;
         }
-        .card:hover .card-icon { background: var(--primary); color: #fff; }
+        .card:hover .card-icon { background: var(--accent); color: #fff; }
         
-        .card-info { flex: 1; overflow: hidden; }
-        .card-name { font-weight: 600; font-size: 0.95rem; color: var(--text-main); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .card-desc { font-size: 0.75rem; color: var(--text-sub); margin-top: 3px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-info { overflow: hidden; }
+        .card-name { font-weight: 600; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-desc { font-size: 0.75rem; color: var(--sub); margin-top: 2px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        footer { text-align: center; padding: 30px; color: var(--text-sub); font-size: 0.85rem; opacity: 0.6; }
-
-        /* 手机端适配 */
+        footer { text-align: center; padding: 20px; color: var(--sub); font-size: 0.9rem; opacity: 0.6; margin-top: auto; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* 移动端适配 */
         @media (max-width: 600px) {
-            .container { width: 92%; }
             .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .card { flex-direction: column; text-align: center; padding: 15px 10px; }
-            .card-icon { margin-right: 0; margin-bottom: 10px; }
-            .clock-time { font-size: 2.8rem; }
+            .card-icon { margin: 0 0 8px 0; }
+            .time { font-size: 2.8rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- 主题切换 -->
+    <!-- 顶部主题开关 -->
     <div class="top-bar">
         <button class="theme-btn" onclick="app.toggleTheme()" title="切换模式">
             <i class="fas fa-sun" id="themeIcon"></i>
@@ -178,60 +178,72 @@
     <header>
         <!-- 时钟 -->
         <div class="clock">
-            <div class="clock-time" id="time">00:00:00</div>
-            <div class="clock-date" id="date">Loading...</div>
+            <div class="time" id="time">00:00:00</div>
+            <div class="date" id="date">Loading...</div>
         </div>
 
-        <!-- 搜索 -->
+        <!-- 搜索区域 -->
         <div class="search-box">
-            <div class="engine-switch">
-                <div class="eng-btn active" onclick="app.setEngine('google')" data-id="google"><i class="fab fa-google"></i> Google</div>
-                <div class="eng-btn" onclick="app.setEngine('bing')" data-id="bing"><i class="fab fa-microsoft"></i> Bing</div>
+            <!-- 引擎切换 -->
+            <div class="eng-switch">
+                <button class="eng-btn" onclick="app.setEng('google')" data-id="google"><i class="fab fa-google"></i> Google</button>
+                <button class="eng-btn" onclick="app.setEng('bing')" data-id="bing"><i class="fab fa-microsoft"></i> Bing</button>
+                <button class="eng-btn" onclick="app.setEng('yandex')" data-id="yandex"><i class="fab fa-yandex"></i> Yandex</button>
             </div>
-            <div class="input-wrapper">
-                <input type="text" id="input" placeholder="Search..." autocomplete="off">
-                <button class="search-icon" onclick="app.search()"><i class="fas fa-search"></i></button>
+            
+            <!-- 输入框 -->
+            <div class="input-group">
+                <input type="text" id="input" autocomplete="off">
+                <button class="search-btn" onclick="app.search()" title="搜索">
+                    <i class="fas fa-search"></i>
+                </button>
             </div>
         </div>
 
         <!-- 书签开关 -->
-        <div class="toggle-area">
-            <button class="main-toggle" onclick="app.toggleBookmarks()">
-                <i class="fas fa-th-large" id="toggleIcon"></i> 
-                <span></span>
-            </button>
-        </div>
+        <button class="toggle-bm" onclick="app.toggleBm()">
+            <i class="fas fa-th-large" id="toggleIcon"></i> 书签
+        </button>
     </header>
 
     <!-- 书签容器 -->
-    <main class="container" id="bookmarks">
-
-        <!-- 分类 1 -->
+    <main id="bookmarks">
+        <!-- 分类 1: 开发常用 -->
+        <!-- 分类 2 -->
         <div class="category">
+            <div class="cat-title"><div class="cat-bar"></div><i class="fas fa-globe"></i>&nbsp; 综合资源</div>
             <div class="grid">
                 <a href="https://www.youtube.com/" target="_blank" class="card">
                     <div class="card-icon"><i class="fab fa-youtube"></i></div>
                     <div class="card-info"><span class="card-name">YouTube</span><span class="card-desc">视频平台</span></div>
                 </a>
+                <a href="https://github.com/spongegg?tab=stars" target="_blank" class="card">
+                    <div class="card-icon"><i class="fa-brands fa-github"></i></div>
+                    <div class="card-info"><span class="card-name">GitHub</span><span class="card-desc">代码托管</span></div>
+                </a>
                 <a href="https://chat.openai.com/" target="_blank" class="card">
                     <div class="card-icon"><i class="fas fa-robot"></i></div>
                     <div class="card-info"><span class="card-name">ChatGPT</span><span class="card-desc">AI 助手</span></div>
+                </a>
+                <a href="https://aistudio.google.com/prompts/new_chat?model=gemini-2.5-pro" target="_blank" class="card">
+                    <div class="card-icon"><i class="fas fa-link"></i></div>
+                    <div class="card-info"><span class="card-name">Google AI Studio</span><span class="card-desc">Google AI </span></div>
                 </a>
                 <a href="https://www.bilibili.com/" target="_blank" class="card">
                     <div class="card-icon"><i class="fa-brands fa-bilibili"></i></div>
                     <div class="card-info"><span class="card-name">bilibili</span><span class="card-desc">B站</span></div>
                 </a>
                 <a href="https://bgm.tv/" target="_blank" class="card">
-                    <div class="card-icon"><img src="https://www.google.com/s2/favicons?sz=64&domain=bgm.tv" class="auto-icon" alt="icon"></div>
+                    <div class="card-icon"><img src="https://www.google.com/s2/favicons?sz=64&domain=bgm.tv" class="auto-icon" alt="icon" style="width:24px;height:24px;"></div>
                     <div class="card-info"><span class="card-name">Bangumi 番组计划</span><span class="card-desc">网站描述</span></div>
-                </a>
-                <a href="https://github.com/" target="_blank" class="card">
-                    <div class="card-icon"><i class="fab fa-github"></i></div>
-                    <div class="card-info"><span class="card-name">GitHub</span><span class="card-desc">代码托管</span></div>
                 </a>
                 <a href="https://mail.google.com/" target="_blank" class="card">
                     <div class="card-icon"><i class="fas fa-envelope"></i></div>
                     <div class="card-info"><span class="card-name">Gmail</span><span class="card-desc">邮件服务</span></div>
+                </a>
+                <a href="https://outlook.live.com/mail/0/" target="_blank" class="card">
+                    <div class="card-icon"><i class="fas fa-link"></i></div>
+                    <div class="card-info"><span class="card-name">outlook</span><span class="card-desc">微软邮箱</span></div>
                 </a>
                 <a href="https://ip.skk.moe" target="_blank" class="card">
                     <div class="card-icon"><i class="fas fa-link"></i></div>
@@ -249,14 +261,22 @@
                     <div class="card-icon"><i class="fas fa-link"></i></div>
                     <div class="card-info"><span class="card-name">Image|免费图床</span><span class="card-desc">描述</span></div>
                 </a>
+                <a href="https://wallhaven.cc" target="_blank" class="card">
+                    <div class="card-icon"><i class="fas fa-link"></i></div>
+                    <div class="card-info"><span class="card-name">Wallhaven</span><span class="card-desc">壁纸</span></div>
+                </a>
                 <a href="https://p.sda1.dev" target="_blank" class="card">
                     <div class="card-icon"><i class="fas fa-link"></i></div>
                     <div class="card-info"><span class="card-name">流浪图床</span><span class="card-desc">描述</span></div>
                 </a>
+                <a href="https://www.dnshe.com/" target="_blank" class="card">
+                    <div class="card-icon"><i class="fas fa-link"></i></div>
+                    <div class="card-info"><span class="card-name">免费DNS</span><span class="card-desc">DNSHE</span></div>
+                </a>
             </div>
         </div>
 
-        <!-- 分类 2 -->
+        <!-- 分类 3 -->
         <div class="category">
             <div class="cat-title"><div class="cat-bar"></div><i class="fas fa-file-export"></i>&nbsp; 传文件</div>
             <div class="grid">
@@ -274,7 +294,8 @@
                 </a>
             </div>
         </div>
-        <!-- 分类 3 -->
+
+        <!-- 分类 4 -->
         <div class="category">
             <div class="cat-title"><div class="cat-bar"></div><i class="fas fa-tools"></i>&nbsp; 小工具</div>
             <div class="grid">
@@ -282,24 +303,32 @@
                     <div class="card-icon"><i class="fas fa-globe-asia"></i></div>
                     <div class="card-info"><span class="card-name">IP查询</span><span class="card-desc">SKK.MOE</span></div>
                 </a>
+                <a href="https://lab.magiconch.com/nbnhhsh/" target="_blank" class="card">
+                    <div class="card-icon"><i class="fas fa-link"></i></div>
+                    <div class="card-info"><span class="card-name">能不能好好说话</span><span class="card-desc">描述</span></div>
+                </a>
                 <a href="https://temp-mail.org/" target="_blank" class="card">
                     <div class="card-icon"><i class="fas fa-envelope-open-text"></i></div>
                     <div class="card-info"><span class="card-name">临时邮箱</span><span class="card-desc">Temp Mail</span></div>
+                </a>
+                <a href="https://zrvvv.com/" target="_blank" class="card">
+                    <div class="card-icon"><i class="fas fa-link"></i></div>
+                    <div class="card-info"><span class="card-name">域名邮箱</span><span class="card-desc">ggboom@zrvvv.com</span></div>
                 </a>
                 <a href="https://netcut.cn/" target="_blank" class="card">
                     <div class="card-icon"><i class="fas fa-cut"></i></div>
                     <div class="card-info"><span class="card-name">网络剪贴板</span><span class="card-desc">跨端文本</span></div>
                 </a>
-                 <a href="https://wallhaven.cc/" target="_blank" class="card">
-                    <div class="card-icon"><i class="fas fa-image"></i></div>
-                    <div class="card-info"><span class="card-name">Wallhaven</span><span class="card-desc">高清壁纸</span></div>
+                <a href="https://lily666.xyz/" target="_blank" class="card">
+                    <div class="card-icon"><i class="fas fa-link"></i></div>
+                    <div class="card-info"><span class="card-name">短链接生成</span><span class="card-desc">lily</span></div>
                 </a>
                 <a href="https://xiaotudou001.github.io/pic2excel/" target="_blank" class="card">
                     <div class="card-icon"><i class="fas fa-link"></i></div>
-                    <div class="card-info"><span class="card-name">图片转Excel像素画</span><span class="card-desc">在线工具将JPG/PNG转换为像素艺术</span></div>
+                    <div class="card-info"><span class="card-name">图片转Excel像素画</span><span class="card-desc">在线工具</span></div>
                 </a><a href="https://pz.v88.qzz.io" target="_blank" class="card">
                     <div class="card-icon"><i class="fas fa-link"></i></div>
-                    <div class="card-info"><span class="card-name">mootv网站源</span><span class="card-desc">API 中转代理服务</span></div>
+                    <div class="card-info"><span class="card-name">mootv网站源</span><span class="card-desc">API 中转</span></div>
                 </a>
                 <a href="https://fontawesome.com/" target="_blank" class="card">
                     <div class="card-icon"><i class="fa-regular fa-font-awesome"></i></div>
@@ -307,21 +336,22 @@
                 </a>
                 <a href="https://pz.v88.qzz.io" target="_blank" class="card">
                     <div class="card-icon"><i class="fas fa-link"></i></div>
-                    <div class="card-info"><span class="card-name">电磁波校时（插耳机）</span><span class="card-desc">网络JJY</span></div>
+                    <div class="card-info"><span class="card-name">电磁波校时</span><span class="card-desc">网络JJY</span></div>
                 </a>
             </div>
         </div>
-        <!-- 分类 4 -->
+
+        <!-- 分类 5 -->
         <div class="category">
-            <div class="cat-title"><div class="cat-bar"></div><i class="fas fa-tools"></i>&nbsp; 动漫</div>
+            <div class="cat-title"><div class="cat-bar"></div><i class="fas fa-tv"></i>&nbsp; 动漫</div>
             <div class="grid">
                 <a href="https://bbs.acgrip.com/" target="_blank" class="card">
                     <div class="card-icon"><i class="fa-solid fa-dog"></i></div>
-                    <div class="card-info"><span class="card-name">Anime动漫字幕论坛</span><span class="card-desc">描述</span></div>
+                    <div class="card-info"><span class="card-name">Anime动漫字幕</span><span class="card-desc">描述</span></div>
                 </a>
                 <a href="https://share.dmhy.org" target="_blank" class="card">
                     <div class="card-icon"><i class="fas fa-link"></i></div>
-                    <div class="card-info"><span class="card-name">動漫花園</span><span class="card-desc">動漫愛好者的自由交流平台</span></div>
+                    <div class="card-info"><span class="card-name">動漫花園</span><span class="card-desc">交流平台</span></div>
                 </a>
                 <a href="https://nyaa.si" target="_blank" class="card">
                     <div class="card-icon"><i class="fas fa-link"></i></div>
@@ -329,13 +359,14 @@
                 </a>
             </div>
         </div>
-        <!-- 分类 5 -->
+
+        <!-- 分类 6 -->
         <div class="category">
-            <div class="cat-title"><div class="cat-bar"></div><i class="fas fa-tools"></i>&nbsp; 影视与字幕下载</div>
+            <div class="cat-title"><div class="cat-bar"></div><i class="fas fa-film"></i>&nbsp; 影视与字幕下载</div>
             <div class="grid">
                  <a href="https://trackerslist.com/#/zh" target="_blank" class="card">
                      <div class="card-icon"><i class="fas fa-link"></i></div>
-                     <div class="card-info"><span class="card-name">XIU2</span><span class="card-desc">添加 Trackers</span></div>
+                     <div class="card-info"><span class="card-name">XIU2</span><span class="card-desc">Trackers</span></div>
                  </a>
                  <a href="https://madeby.lynx.pink/magnets/" target="_blank" class="card">
                      <div class="card-icon"><i class="fas fa-link"></i></div>
@@ -343,7 +374,7 @@
                  </a>
                  <a href="https://piratebayproxy.net/zh/" target="_blank" class="card">
                      <div class="card-icon"><i class="fas fa-link"></i></div>
-                     <div class="card-info"><span class="card-name">海盗湾代理</span><span class="card-desc">解锁海盗湾并下载种子</span></div>
+                     <div class="card-info"><span class="card-name">海盗湾代理</span><span class="card-desc">种子下载</span></div>
                  </a>
                  <a href="https://subhd.tv" target="_blank" class="card">
                      <div class="card-icon"><i class="fas fa-link"></i></div>
@@ -351,13 +382,14 @@
                  </a>
                  <a href="https://zimuku.hezidh.com" target="_blank" class="card">
                      <div class="card-icon"><i class="fas fa-link"></i></div>
-                     <div class="card-info"><span class="card-name">字幕库(zimuku)</span><span class="card-desc">字幕下载网站</span></div>
+                     <div class="card-info"><span class="card-name">字幕库</span><span class="card-desc">字幕下载</span></div>
                  </a>
             </div>
         </div>
-        <!-- 分类 6 -->
+
+        <!-- 分类 7 -->
         <div class="category">
-            <div class="cat-title"><div class="cat-bar"></div><i class="fas fa-tools"></i>&nbsp; 学习版游戏</div>
+            <div class="cat-title"><div class="cat-bar"></div><i class="fas fa-gamepad"></i>&nbsp; 学习版游戏</div>
             <div class="grid">
                 <a href="https://flingtrainer.com" target="_blank" class="card">
                     <div class="card-icon"><i class="fas fa-link"></i></div>
@@ -369,7 +401,7 @@
                 </a>
                 <a href="https://sway.cloud.microsoft/ruijH7BYH9RwA9HG?ref=Link" target="_blank" class="card">
                     <div class="card-icon"><i class="fas fa-link"></i></div>
-                    <div class="card-info"><span class="card-name">flysheep资源避难所发布页</span><span class="card-desc">游戏下载</span></div>
+                    <div class="card-info"><span class="card-name">flysheep</span><span class="card-desc">资源避难所</span></div>
                 </a>
             </div>
         </div>
@@ -379,82 +411,101 @@
         <p>&copy; 2026 Personal Dashboard</p>
     </footer>
 
+    <!-- 逻辑处理 -->
     <script>
+        // === 1. 搜索引擎配置 ===
+        const ENGINES = {
+            google: { url: 'https://www.google.com/search?q=', placeholder: '搜索 Google...' },
+            bing:   { url: 'https://www.bing.com/search?q=',   placeholder: '搜索 Bing...' },
+            yandex: { url: 'https://yandex.com/search/?text=', placeholder: '搜索 Yandex...' }
+        };
+
         const app = {
-            engine: localStorage.getItem('engine') || 'google',
-            
-            // 初始化
+            data: {
+                engine: localStorage.getItem('engine') || 'google',
+                theme: localStorage.getItem('theme') || 'dark'
+            },
+
             init() {
                 this.updateClock();
-                setInterval(this.updateClock, 1000);
-                this.setEngine(this.engine);
+                setInterval(() => this.updateClock(), 1000);
+                this.setEng(this.data.engine); 
+                this.applyTheme(this.data.theme); 
                 
-                // 主题初始化
-                const savedTheme = localStorage.getItem('theme') || 'dark';
-                document.documentElement.setAttribute('data-theme', savedTheme);
-                this.updateThemeIcon(savedTheme);
-
-                // 回车搜索监听
-                document.getElementById('input').addEventListener('keypress', (e) => {
-                    if(e.key === 'Enter') this.search();
-                });
+                // 监听输入框回车
+                const input = document.getElementById('input');
+                if(input) {
+                    input.addEventListener('keypress', e => e.key === 'Enter' && this.search());
+                }
             },
 
-            // 时钟逻辑
+            // === 核心：切换引擎 ===
+            setEng(key) {
+                this.data.engine = key;
+                localStorage.setItem('engine', key);
+                
+                // 1. 按钮样式高亮
+                document.querySelectorAll('.eng-btn').forEach(btn => {
+                    // 如果按钮的 data-id 等于当前key，则添加 active 类，否则移除
+                    if (btn.dataset.id === key) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+                
+                // 2. 切换输入框提示文字
+                const input = document.getElementById('input');
+                if(input) {
+                    input.placeholder = ENGINES[key].placeholder;
+                    input.focus();
+                }
+            },
+
+            // === 核心：搜索跳转 ===
+            search() {
+                const input = document.getElementById('input');
+                const query = input ? input.value.trim() : '';
+                if (!query) return;
+                
+                const baseUrl = ENGINES[this.data.engine].url;
+                window.open(baseUrl + encodeURIComponent(query), '_blank');
+            },
+
+            // === 辅助：时钟 ===
             updateClock() {
                 const now = new Date();
-                document.getElementById('time').innerText = now.toLocaleTimeString('zh-CN', { hour12: false });
-                document.getElementById('date').innerText = now.toLocaleDateString('zh-CN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                const timeEl = document.getElementById('time');
+                const dateEl = document.getElementById('date');
+                if(timeEl) timeEl.innerText = now.toLocaleTimeString('zh-CN', {hour12:false});
+                if(dateEl) dateEl.innerText = now.toLocaleDateString('zh-CN', {year:'numeric', month:'long', day:'numeric', weekday:'long'});
             },
 
-            // 搜索引擎切换
-            setEngine(name) {
-                this.engine = name;
-                localStorage.setItem('engine', name);
-                
-                // 更新UI
-                document.querySelectorAll('.eng-btn').forEach(btn => btn.classList.remove('active'));
-                document.querySelector(`.eng-btn[data-id="${name}"]`).classList.add('active');
-                
-                // 更新Placeholder
-                const input = document.getElementById('input');
-                input.placeholder = name === 'google' ? '搜索 Google...' : '搜索 Bing...';
-                input.focus();
-            },
-
-            // 执行搜索
-            search() {
-                const query = document.getElementById('input').value;
-                if(!query) return;
-                const url = this.engine === 'google' 
-                    ? `https://www.google.com/search?q=${encodeURIComponent(query)}`
-                    : `https://www.bing.com/search?q=${encodeURIComponent(query)}`;
-                window.open(url, '_blank');
-            },
-
-            // 主题切换
+            // === 辅助：主题切换 ===
             toggleTheme() {
-                const html = document.documentElement;
-                const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-                html.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                this.updateThemeIcon(newTheme);
+                const newTheme = this.data.theme === 'dark' ? 'light' : 'dark';
+                this.applyTheme(newTheme);
             },
 
-            updateThemeIcon(theme) {
-                document.getElementById('themeIcon').className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            applyTheme(theme) {
+                this.data.theme = theme;
+                localStorage.setItem('theme', theme);
+                document.documentElement.setAttribute('data-theme', theme);
+                const icon = document.getElementById('themeIcon');
+                if(icon) icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
             },
 
-            // 书签显示切换
-            toggleBookmarks() {
-                const main = document.getElementById('bookmarks');
+            // === 辅助：书签开关 ===
+            toggleBm() {
+                const bm = document.getElementById('bookmarks');
                 const icon = document.getElementById('toggleIcon');
-                main.classList.toggle('show');
-                icon.className = main.classList.contains('show') ? 'fas fa-chevron-up' : 'fas fa-th-large';
+                if(bm) {
+                    bm.classList.toggle('show');
+                    if(icon) icon.className = bm.classList.contains('show') ? 'fas fa-chevron-up' : 'fas fa-th-large';
+                }
             }
         };
 
-        // 启动应用
         window.onload = () => app.init();
     </script>
 </body>
