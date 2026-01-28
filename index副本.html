@@ -1,166 +1,197 @@
 <!DOCTYPE html>
+<!-- data-theme="dark" 设置默认主题为深色模式 -->
 <html lang="zh-CN" data-theme="dark">
 <head>
     <meta charset="UTF-8">
+    <!-- 适配移动端屏幕 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>极简导航</title>
+    <!-- 引入 FontAwesome 图标库 (用于显示放大镜、品牌图标等) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
     <style>
-        /* ================= 1. 配置区域 ================= */
+        /* ================= 1. 全局配色变量 (想换颜色改这里) ================= */
         :root {
-            /* 界面配色 */
-            --bg: #111827;       /* 背景色 */
-            --card: #1f2937;     /* 卡片/按钮背景 */
-            --text: #f3f4f6;     /* 主文字 */
-            --sub: #9ca3af;      /* 副文字 */
-            --border: #374151;   /* 边框 */
-            --accent: #3b82f6;   /* 强调色(蓝色) - 用于搜索按钮和高亮 */
+            /* 界面基础颜色 */
+            --bg: #111827;       /* 整个网页背景色 (深灰) */
+            --card: #1f2937;     /* 按钮和卡片的背景色 (稍浅的灰) */
+            --text: #f3f4f6;     /* 主要文字颜色 (白) */
+            --sub: #9ca3af;      /* 次要文字颜色 (灰) */
+            --border: #374151;   /* 边框线条颜色 */
+            --accent: #3b82f6;   /* 强调色/主题色 (目前是蓝色) */
             
-            /* 搜索引擎主题色 */
-            --c-google: #EA4335;
-            --c-bing:   #00809d;
-            --c-yandex: #fcb900;
+            /* 搜索引擎各自的品牌色 */
+            --c-google: #EA4335; /* 谷歌红 */
+            --c-bing:   #00809d; /* 必应蓝 */
+            --c-yandex: #fcb900; /* Yandex黄 */
         }
 
-        /* 日间模式变量覆盖 */
+        /* 当切换到 [日间模式] 时，覆盖上面的变量为亮色系 */
         [data-theme="light"] {
-            --bg: #f4f6f8; --card: #ffffff; --text: #333; --sub: #666;
+            --bg: #f4f6f8; 
+            --card: #ffffff; 
+            --text: #333; 
+            --sub: #666;
             --border: #e5e7eb;
         }
 
-        /* ================= 2. 基础布局 ================= */
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; margin: 0; display: flex; flex-direction: column; transition: 0.3s; }
+        /* ================= 2. 基础布局样式 ================= */
+        body { 
+            font-family: 'Segoe UI', sans-serif; /* 字体设置 */
+            background: var(--bg); 
+            color: var(--text); 
+            min-height: 100vh; /* 最小高度占满屏幕 */
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; /* 垂直排列：上中下 */
+            transition: 0.3s; /* 主题切换时的过渡动画 */
+        }
+        
+        /* 去掉链接下划线，继承文字颜色 */
         a { text-decoration: none; color: inherit; }
+        /* 按钮通用样式：去边框、变鼠标手势 */
         button { cursor: pointer; border: none; background: transparent; color: inherit; }
         
-        /* 顶部主题按钮 */
+        /* 右上角主题切换按钮 */
         .top-bar { position: absolute; top: 20px; right: 20px; }
-        .theme-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--card); border: 1px solid var(--border); transition: 0.3s; display: flex; align-items: center; justify-content: center;}
+        .theme-btn { 
+            width: 40px; height: 40px; border-radius: 50%; 
+            background: var(--card); border: 1px solid var(--border); 
+            transition: 0.3s; display: flex; align-items: center; justify-content: center;
+        }
         .theme-btn:hover { border-color: var(--accent); color: var(--accent); transform: rotate(15deg); }
 
-        /* ================= 3. 头部与搜索 ================= */
-        header { padding: 10vh 20px 40px; text-align: center; max-width: 700px; margin: 0 auto; }
+        /* ================= 3. 核心区域：时钟与搜索 ================= */
+        header { 
+            padding: 10vh 20px 40px; /* 上留白10%屏幕高度 */
+            text-align: center; 
+            max-width: 700px; 
+            margin: 0 auto; /* 水平居中 */
+        }
         
-        /* 时钟 */
+        /* 大时钟字体 */
         .time { font-size: 3.5rem; font-weight: 700; letter-spacing: 1px; }
         .date { color: var(--sub); margin-bottom: 30px; }
 
-        /* 引擎切换器 */
+        /* 搜索引擎切换按钮组 */
         .eng-switch { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
         .eng-btn {
             padding: 8px 18px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;
             background: var(--card); border: 1px solid var(--border); color: var(--sub);
             display: flex; align-items: center; gap: 8px; transition: 0.2s;
         }
-        .eng-btn:hover { transform: translateY(-2px); }
+        .eng-btn:hover { transform: translateY(-2px); } /* 悬停上浮效果 */
         
-        /* 引擎选中状态 */
+        /* 选中某个引擎时的样式 (高亮) */
         .eng-btn.active { color: #fff; border-color: transparent; transform: scale(1.05); }
         .eng-btn[data-id="google"].active { background: var(--c-google); }
         .eng-btn[data-id="bing"].active   { background: var(--c-bing); }
         .eng-btn[data-id="yandex"].active { background: var(--c-yandex); color: #000; }
 
-        /* --- 搜索框区域 (优化版) --- */
-        。input-group { 
-            position: relative; 
+        /* --- 搜索框容器 (关键布局) --- */
+        .input-group { 
+            position: relative; /*以此为基准定位搜索图标 */
             max-width: 600px; 
             margin: 0 auto; 
-            display: flex; /* 使用 Flex 布局 */
-            align-items: center;
+            display: block;
         }
         
+        /* 输入框样式 */
         input {
             width: 100%; 
             height: 52px; 
-            padding: 0 60px 0 25px; /* 右侧留空给图标 */
-            border-radius: 50px;
-            /* 背景稍微深一点，增加层次感 */
+            padding: 0 60px 0 25px; /* 右边留出60px给图标，防止文字被遮挡 */
+            border-radius: 50px;    /* 圆角 */
             background: rgba(31, 41, 55, 0.8); 
             border: 2px solid var(--border); 
             color: var(--text);
             font-size: 1.1rem; 
             outline: none; 
             transition: all 0.3s ease;
+            
+            /* ★★★ 修复：防止边框和内边距撑大盒子，导致不居中 ★★★ */
+            box-sizing: border-box; 
         }
         
-        /* 输入框聚焦时：边框变亮，阴影增强 */
+        /* 输入框被点击(聚焦)时的发光效果 */
         input:focus { 
             border-color: var(--accent); 
             background: var(--card);
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); 
         }
 
-        /* 搜索按钮 - 极简透明风格 */
+        /* 搜索放大镜按钮 */
         .search-btn { 
             position: absolute; 
-            right: 6px; 
-            top: 50%;
-            transform: translateY(-50%); /* 垂直居中 */
+            right: 8px;    /* 距离右边框8像素 */
+            top: 50%;      /* 垂直位置在50% */
+            transform: translateY(-50%); /* 向上偏移自身一半，实现绝对垂直居中 */
             
-            width: 40px; 
-            height: 40px; 
-            border-radius: 50%;
-            
-            /* 默认透明背景，只显示图标颜色 */
+            width: 40px; height: 40px; border-radius: 50%;
             background: transparent; 
-            color: var(--sub); /* 默认灰色，不抢眼 */
-            
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
+            color: var(--sub); 
+            display: flex; align-items: center; justify-content: center;
             font-size: 1.2rem; 
             transition: all 0.2s ease;
+            z-index: 10;
         }
 
-        /* 鼠标悬停时：显示背景色和主题色 */
         .search-btn:hover { 
-            background: rgba(59, 130, 246, 0.1); /* 淡淡的蓝色背景 */
-            color: var(--accent); /* 图标变蓝 */
-            transform: translateY(-50%) scale(1.1);
+            background: rgba(59, 130, 246, 0.1); 
+            color: var(--accent); 
+            transform: translateY(-50%) scale(1.1); /* 保持居中的同时放大 */
         }
-        /* --------------------------- */
 
-        /* 书签开关 */
-        .toggle-bm { margin-top: 30px; padding: 8px 25px; border: 1px solid var(--border); border-radius: 30px; color: var(--sub); transition: 0.3s; }
+        /* 书签显示/隐藏开关 */
+        .toggle-bm { 
+            margin-top: 30px; padding: 8px 25px; 
+            border: 1px solid var(--border); border-radius: 30px; 
+            color: var(--sub); transition: 0.3s; 
+        }
         .toggle-bm:hover { border-color: var(--accent); color: var(--text); background: var(--card); }
 
-        /* ================= 4. 书签区域 ================= */
+        /* ================= 4. 书签区域样式 ================= */
         #bookmarks { 
-            display: none; width: 95%; max-width: 1600px; margin: 0 auto; padding-bottom: 40px; 
-            animation: slideUp 0.4s ease-out; 
+            display: none; /* 默认隐藏 */
+            width: 95%; max-width: 1600px; margin: 0 auto; padding-bottom: 40px; 
+            animation: slideUp 0.4s ease-out; /* 展开动画 */
         }
-        #bookmarks.show { display: block; }
+        #bookmarks.show { display: block; } /* 加了show类名就显示 */
         
         .cat-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        .cat-bar { width: 4px; height: 18px; background: var(--accent); border-radius: 2px; }
+        .cat-bar { width: 4px; height: 18px; background: var(--accent); border-radius: 2px; } /* 标题前的小竖条 */
         .category { margin-bottom: 30px; }
 
+        /* 网格布局：自动填充，最小宽度200px */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
         
+        /* 单个书签卡片 */
         .card {
             background: var(--card); border: 1px solid var(--border); border-radius: 12px;
             padding: 14px; display: flex; align-items: center; transition: 0.2s;
         }
         .card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.3); }
         
-        。card-icon { 
+        .card-icon { 
             width: 40px; height: 40px; border-radius: 8px; background: rgba(59, 130, 246, 0.1); 
             color: var(--accent); display: flex; align-items: center; justify-content: center; 
             margin-right: 12px; font-size: 1.2rem; flex-shrink: 0;
         }
         .card:hover .card-icon { background: var(--accent); color: #fff; }
         
+        /* 卡片文字截断处理 (防止文字太长换行) */
         .card-info { overflow: hidden; }
         .card-name { font-weight: 600; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .card-desc { font-size: 0.75rem; color: var(--sub); margin-top: 2px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         footer { text-align: center; padding: 20px; color: var(--sub); font-size: 0.9rem; opacity: 0.6; margin-top: auto; }
+        
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* 移动端适配 */
+        /* 移动端适配：屏幕小于600px时 */
         @media (max-width: 600px) {
-            .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-            .card { flex-direction: column; text-align: center; padding: 15px 10px; }
+            .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } /* 强制两列 */
+            .card { flex-direction: column; text-align: center; padding: 15px 10px; } /* 卡片内容上下排 */
             .card-icon { margin: 0 0 8px 0; }
             .time { font-size: 2.8rem; }
         }
@@ -168,31 +199,34 @@
 </head>
 <body>
 
-    <!-- 顶部主题开关 -->
+    <!-- 1. 顶部栏：主题开关 -->
     <div class="top-bar">
         <button class="theme-btn" onclick="app.toggleTheme()" title="切换模式">
             <i class="fas fa-sun" id="themeIcon"></i>
         </button>
     </div>
 
+    <!-- 2. 头部：时钟与搜索 -->
     <header>
-        <!-- 时钟 -->
+        <!-- 时钟显示区 -->
         <div class="clock">
+            <!-- 时间由 JS 动态更新 -->
             <div class="time" id="time">00:00:00</div>
             <div class="date" id="date">Loading...</div>
         </div>
 
-        <!-- 搜索区域 -->
+        <!-- 搜索功能区 -->
         <div class="search-box">
-            <!-- 引擎切换 -->
+            <!-- 搜索引擎切换按钮 -->
             <div class="eng-switch">
                 <button class="eng-btn" onclick="app.setEng('google')" data-id="google"><i class="fab fa-google"></i> Google</button>
                 <button class="eng-btn" onclick="app.setEng('bing')" data-id="bing"><i class="fab fa-microsoft"></i> Bing</button>
                 <button class="eng-btn" onclick="app.setEng('yandex')" data-id="yandex"><i class="fab fa-yandex"></i> Yandex</button>
             </div>
             
-            <!-- 输入框 -->
+            <!-- 输入框与按钮 -->
             <div class="input-group">
+                <!-- autocomplete="off" 防止浏览器弹出历史输入记录遮挡视线 -->
                 <input type="text" id="input" autocomplete="off">
                 <button class="search-btn" onclick="app.search()" title="搜索">
                     <i class="fas fa-search"></i>
@@ -200,14 +234,15 @@
             </div>
         </div>
 
-        <!-- 书签开关 -->
+        <!-- 展开书签的按钮 -->
         <button class="toggle-bm" onclick="app.toggleBm()">
             <i class="fas fa-th-large" id="toggleIcon"></i> 书签
         </button>
     </header>
 
-    <!-- 书签容器 -->
+    <!-- 3. 书签内容区 (ID: bookmarks) -->
     <main id="bookmarks">
+        
         <!-- 分类 1: 开发常用 -->
         <!-- 分类 2 -->
         <div class="category">
@@ -234,7 +269,7 @@
                     <div class="card-info"><span class="card-name">bilibili</span><span class="card-desc">B站</span></div>
                 </a>
                 <a href="https://bgm.tv/" target="_blank" class="card">
-                    <div class="card-icon"><img src="https://www.google.com/s2/favicons?sz=64&domain=bgm.tv" class="auto-icon" alt="icon" style="width:24px;height:24px;"></div>
+                    <div class="card-icon"><i class="fas fa-link"></i></div>
                     <div class="card-info"><span class="card-name">Bangumi 番组计划</span><span class="card-desc">网站描述</span></div>
                 </a>
                 <a href="https://mail.google.com/" target="_blank" class="card">
@@ -272,6 +307,10 @@
                 <a href="https://www.dnshe.com/" target="_blank" class="card">
                     <div class="card-icon"><i class="fas fa-link"></i></div>
                     <div class="card-info"><span class="card-name">免费DNS</span><span class="card-desc">DNSHE</span></div>
+                </a>
+                <a href="https://tv.tyboe.top/" target="_blank" class="card">
+                    <div class="card-icon"><i class="fas fa-link"></i></div>
+                    <div class="card-info"><span class="card-name">泥嚎，欢迎来看~</span><span class="card-desc">LunarTV</span></div>
                 </a>
             </div>
         </div>
@@ -405,15 +444,18 @@
                 </a>
             </div>
         </div>
+
+        <!-- ... 其他分类 ... -->
     </main>
 
+    <!-- 底部版权 (注意：这里的 2026 是写死的，明年记得改代码，或者删掉这行) -->
     <footer>
         <p>&copy; 2026 Personal Dashboard</p>
     </footer>
 
-    <!-- 逻辑处理 -->
+    <!-- ================= 4. 逻辑处理 (JavaScript) ================= -->
     <script>
-        // === 1. 搜索引擎配置 ===
+        // 配置：这里定义了搜索跳转的地址
         const ENGINES = {
             google: { url: 'https://www.google.com/search?q=', placeholder: '搜索 Google...' },
             bing:   { url: 'https://www.bing.com/search?q=',   placeholder: '搜索 Bing...' },
@@ -421,32 +463,33 @@
         };
 
         const app = {
+            // 存储当前状态：默认用 google，默认主题 dark
             data: {
                 engine: localStorage.getItem('engine') || 'google',
                 theme: localStorage.getItem('theme') || 'dark'
             },
 
+            // --- 页面加载时执行 ---
             init() {
                 this.updateClock();
-                setInterval(() => this.updateClock(), 1000);
-                this.setEng(this.data.engine); 
-                this.applyTheme(this.data.theme); 
+                setInterval(() => this.updateClock(), 1000); // 开启每秒更新时钟
+                this.setEng(this.data.engine); // 设置上次记住的搜索引擎
+                this.applyTheme(this.data.theme); // 设置上次记住的主题
                 
-                // 监听输入框回车
+                // 监听输入框：如果按下回车键(Enter)，也执行搜索
                 const input = document.getElementById('input');
                 if(input) {
                     input.addEventListener('keypress', e => e.key === 'Enter' && this.search());
                 }
             },
 
-            // === 核心：切换引擎 ===
+            // --- 功能：切换搜索引擎 ---
             setEng(key) {
                 this.data.engine = key;
-                localStorage.setItem('engine', key);
+                localStorage.setItem('engine', key); // 记住选择
                 
-                // 1. 按钮样式高亮
+                // 1. 让按钮变色 (添加 active 类)
                 document.querySelectorAll('.eng-btn').forEach(btn => {
-                    // 如果按钮的 data-id 等于当前key，则添加 active 类，否则移除
                     if (btn.dataset.id === key) {
                         btn.classList.add('active');
                     } else {
@@ -454,58 +497,65 @@
                     }
                 });
                 
-                // 2. 切换输入框提示文字
+                // 2. 改变输入框里的提示文字
                 const input = document.getElementById('input');
                 if(input) {
                     input.placeholder = ENGINES[key].placeholder;
-                    input.focus();
+                    input.focus(); // 自动把光标移进去
                 }
             },
 
-            // === 核心：搜索跳转 ===
+            // --- 功能：执行搜索跳转 ---
             search() {
                 const input = document.getElementById('input');
                 const query = input ? input.value.trim() : '';
-                if (!query) return;
+                if (!query) return; // 如果没输入内容，什么都不做
                 
+                // 拼接搜索地址并打开新标签页
                 const baseUrl = ENGINES[this.data.engine].url;
                 window.open(baseUrl + encodeURIComponent(query), '_blank');
             },
 
-            // === 辅助：时钟 ===
+            // --- 功能：更新时钟 (读取电脑系统时间) ---
             updateClock() {
                 const now = new Date();
                 const timeEl = document.getElementById('time');
                 const dateEl = document.getElementById('date');
+                // 设置时间格式：24小时制
                 if(timeEl) timeEl.innerText = now.toLocaleTimeString('zh-CN', {hour12:false});
+                // 设置日期格式
                 if(dateEl) dateEl.innerText = now.toLocaleDateString('zh-CN', {year:'numeric', month:'long', day:'numeric', weekday:'long'});
             },
 
-            // === 辅助：主题切换 ===
+            // --- 功能：切换日间/夜间模式 ---
             toggleTheme() {
                 const newTheme = this.data.theme === 'dark' ? 'light' : 'dark';
                 this.applyTheme(newTheme);
             },
 
+            // 应用主题并保存到本地存储
             applyTheme(theme) {
                 this.data.theme = theme;
                 localStorage.setItem('theme', theme);
-                document.documentElement.setAttribute('data-theme', theme);
+                document.documentElement.setAttribute('data-theme', theme); // 修改 html 标签属性
+                // 切换右上角图标
                 const icon = document.getElementById('themeIcon');
                 if(icon) icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
             },
 
-            // === 辅助：书签开关 ===
+            // --- 功能：展开/折叠书签 ---
             toggleBm() {
                 const bm = document.getElementById('bookmarks');
                 const icon = document.getElementById('toggleIcon');
                 if(bm) {
-                    bm.classList.toggle('show');
+                    bm.classList.toggle('show'); // 切换 CSS 类名来控制显示隐藏
+                    // 切换按钮图标 (方块 <-> 箭头)
                     if(icon) icon.className = bm.classList.contains('show') ? 'fas fa-chevron-up' : 'fas fa-th-large';
                 }
             }
         };
 
+        // 等待网页资源加载完毕后启动
         window.onload = () => app.init();
     </script>
 </body>
